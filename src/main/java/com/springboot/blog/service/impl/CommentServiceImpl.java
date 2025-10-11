@@ -33,6 +33,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto createComment(long postId, CommentDto commentDto) {
 
         Comment comment = mapToEntity(commentDto);
+        comment.setId(null);
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post","id",postId));
 
@@ -106,4 +107,3 @@ public class CommentServiceImpl implements CommentService {
 
 
 }
-;
