@@ -14,9 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -106,7 +104,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deletePostById(long id) {
 
-        Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post","id",id));
+        postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post","id",id));
 
         postRepository.deleteById(id);
 
