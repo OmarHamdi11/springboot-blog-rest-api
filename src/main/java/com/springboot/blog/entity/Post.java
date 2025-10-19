@@ -33,7 +33,9 @@ public class Post {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "content", nullable = false)
+    //make content column to be TEXT instead of just VARCHAR(255) to be able to have big content
+    @Lob
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
