@@ -42,4 +42,9 @@ public class Post {
     //@ToString.Exclude
     //@EqualsAndHashCode.Exclude
     private Set<Comment> comments = new HashSet<>();
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 }
