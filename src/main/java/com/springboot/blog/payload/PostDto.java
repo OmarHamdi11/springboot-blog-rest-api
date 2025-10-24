@@ -1,7 +1,6 @@
 package com.springboot.blog.payload;
 
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -29,4 +28,6 @@ public class PostDto {
     private String content;
 
     private Set<CommentDto> comments;
+
+    private Long categoryId;
 }
