@@ -31,14 +31,15 @@ public class JwtTokenProvider {
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
 
-        String token = Jwts.builder()    // بيبدأ يبني التوكن
+        // بيرجع التوكن النهائي كنص (String) جاهز للإرسال للعميل
+
+        return Jwts.builder()    // بيبدأ يبني التوكن
                 .subject(username)       // بيسجّل اسم المستخدم في الـ payload (claim: sub)
                 .issuedAt(new Date())    // بيحدد وقت إصدار التوكن
                 .expiration(expireDate)  // بيحدد وقت انتهاء صلاحية التوكن
                 .signWith(key())         // بيوقّع التوكن بالمفتاح السري
-                .compact();              // بيرجع التوكن النهائي كنص (String) جاهز للإرسال للعميل
+                .compact();          // بيرجع التوكن النهائي كنص (String) جاهز للإرسال للعميل
 
-        return token;
     }
 
     public Key key(){
