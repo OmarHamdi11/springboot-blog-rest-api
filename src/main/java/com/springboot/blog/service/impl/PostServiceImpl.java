@@ -17,7 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -130,7 +129,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostDto> getPostsByCategoryId(Long categoryId) {
 
-        Category category = categoryRepository.findById(categoryId).orElseThrow(
+        categoryRepository.findById(categoryId).orElseThrow(
                 () -> new ResourceNotFoundException("Category", "id", categoryId)
         );
 
