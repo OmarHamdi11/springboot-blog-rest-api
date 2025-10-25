@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 @OpenAPIDefinition(
         info = @Info(
-                title = "Spring Boot Blog App REST APIs",
-                description = "Spring Boot REST APIs Documentation",
+                title = "Spring Boot Blog REST API Documentation",
+                description = "A comprehensive REST API for managing blog posts, comments, categories, and user authentication. Built with Spring Boot and secured with JWT authentication.",
                 version = "v1.0 ",
                 contact = @Contact(
                         name = "Omar",
@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean;
                 ),
                 license = @License(
                         name = "MIT License",
-                        url = "https://opensource.org/license/mit"
+                        url = "https://opensource.org/licenses/MIT"
                 )
         ),
         externalDocs = @ExternalDocumentation(
