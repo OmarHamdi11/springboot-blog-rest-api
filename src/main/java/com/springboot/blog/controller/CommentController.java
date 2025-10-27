@@ -1,7 +1,9 @@
 package com.springboot.blog.controller;
 
 import com.springboot.blog.payload.CommentDto;
+import com.springboot.blog.payload.CommentResponse;
 import com.springboot.blog.service.CommentService;
+import com.springboot.blog.utils.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -12,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts/{postId}/comments")
@@ -45,15 +46,21 @@ public class CommentController {
 
     @Operation(
             summary = "Get all comments for a post",
-            description = "Retrieves all comments associated with a specific blog post ID"
+            description = "Retrieves all comments associated with a specific blog post ID, Retrieves a paginated list of all blog comments with optional sorting. Supports pagination and sorting parameters."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Comments retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Post not found")
     })
     @GetMapping
-    public ResponseEntity<List<CommentDto>> getCommentsByPostId(@PathVariable(value = "postId") long postId){
-        return ResponseEntity.ok(commentService.getCommentsByPostId(postId)) ;
+    public ResponseEntity<CommentResponse> getCommentsByPostId(
+            @PathVariable(value = "postId") long postId,
+            @RequestParam(value = "pageNo" , defaultValue = AppConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+            @RequestParam(value = "pageSize" , defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir
+    ){
+        return ResponseEntity.ok(commentService.getCommentsByPostId(postId,pageNo,pageSize,sortBy,sortDir)) ;
     }
 
     @Operation(

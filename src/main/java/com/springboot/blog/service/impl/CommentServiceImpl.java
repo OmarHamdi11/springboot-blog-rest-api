@@ -5,11 +5,16 @@ import com.springboot.blog.entity.Post;
 import com.springboot.blog.exception.BlogAPIException;
 import com.springboot.blog.exception.ResourceNotFoundException;
 import com.springboot.blog.payload.CommentDto;
+import com.springboot.blog.payload.CommentResponse;
 import com.springboot.blog.repository.CommentRepository;
 import com.springboot.blog.repository.PostRepository;
 import com.springboot.blog.service.CommentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -43,10 +48,34 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentDto> getCommentsByPostId(long postId) {
-        List<Comment> comments = commentRepository.findByPostId(postId);
+    public CommentResponse getCommentsByPostId(long postId, int pageNo, int pageSize, String sortBy, String sortDir) {
 
-        return comments.stream().map(this::mapToDTO).toList();
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post","id",postId));
+
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        // create pageable instance
+        Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
+
+        // Find all Posts
+        Page<Comment> commentsPage = commentRepository.findByPostId(postId, pageable);
+
+        List<Comment> commentsList = commentsPage.getContent();
+
+        // Map to DTO and return
+        List<CommentDto> commentDtoList = commentsList.stream().map(this::mapToDTO).toList();
+
+        CommentResponse commentResponse = new CommentResponse();
+
+        commentResponse.setPageNo(commentsPage.getNumber());
+        commentResponse.setPageSize(commentsPage.getSize());
+        commentResponse.setTotalPages(commentsPage.getTotalPages());
+        commentResponse.setTotalElements(commentsPage.getTotalElements());
+        commentResponse.setLast(commentsPage.isLast());
+        commentResponse.setContent(commentDtoList);
+
+        return commentResponse;
     }
 
     @Override
