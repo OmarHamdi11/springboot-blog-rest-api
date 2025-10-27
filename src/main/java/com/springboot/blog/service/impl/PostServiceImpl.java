@@ -1,5 +1,7 @@
 package com.springboot.blog.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.springboot.blog.entity.Category;
 import com.springboot.blog.entity.Post;
 import com.springboot.blog.exception.ResourceNotFoundException;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -24,15 +27,18 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public PostServiceImpl(PostRepository postRepository,
                            ModelMapper modelMapper,
-                           CategoryRepository categoryRepository
+                           CategoryRepository categoryRepository,
+                           ObjectMapper objectMapper
     ) {
         this.postRepository = postRepository;
         this.modelMapper = modelMapper;
         this.categoryRepository = categoryRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -118,6 +124,33 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public PostDto patchPost(long id, Map<String, Object> patchPayload) {
+
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post","id",id));
+
+        PostDto postDto = mapToDTO(post);
+
+        PostDto patchedPostDto = apply(patchPayload,postDto);
+
+        // Map back to entity and save
+        post.setTitle(patchedPostDto.getTitle());
+        post.setDescription(patchedPostDto.getDescription());
+        post.setContent(patchedPostDto.getContent());
+
+        if (patchedPostDto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(patchedPostDto.getCategoryId())
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException("Category", "id", patchedPostDto.getCategoryId())
+                    );
+            post.setCategory(category);
+        }
+
+        Post savedPost = postRepository.save(post);
+
+        return mapToDTO(savedPost);
+    }
+
+    @Override
     public void deletePostById(long id) {
 
         postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post","id",id));
@@ -145,6 +178,21 @@ public class PostServiceImpl implements PostService {
 
     private Post mapToEntity(PostDto postDto){
         return modelMapper.map(postDto, Post.class);
+    }
+
+    private PostDto apply(Map<String, Object> patchPayload, PostDto postDto) {
+
+        // convert post object to json object node using ObjectMapper
+        ObjectNode postNode = objectMapper.convertValue(postDto, ObjectNode.class);
+
+        // convert patchPayload to json object node using ObjectMapper
+        ObjectNode patchNode = objectMapper.convertValue(patchPayload , ObjectNode.class);
+
+        // merge patch update into post node
+        postNode.setAll(patchNode);
+
+        return objectMapper.convertValue(postNode , PostDto.class);
+
     }
 
 }

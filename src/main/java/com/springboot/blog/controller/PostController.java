@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -104,6 +105,15 @@ public class PostController {
     public ResponseEntity<PostDto> updatePost(@Valid @RequestBody PostDto postDto, @PathVariable(name = "id") long id){
         return new ResponseEntity<>(postService.updatePost(postDto,id),HttpStatus.OK);
     }
+
+    @PatchMapping("{id}")
+    public ResponseEntity<PostDto> patchPost(
+            @PathVariable(name = "id") long id,
+            @RequestBody Map<String,Object> patchPayload
+    ){
+        return ResponseEntity.ok(postService.patchPost(id,patchPayload));
+    }
+
 
     // delete post by id
     @Operation(
