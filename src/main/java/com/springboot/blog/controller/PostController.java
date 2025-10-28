@@ -106,6 +106,21 @@ public class PostController {
         return new ResponseEntity<>(postService.updatePost(postDto,id),HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "Patch post",
+            description = "Patch an existing blog post with new content fields. Only accessible by ADMIN users."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Post updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid post data provided"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required"),
+            @ApiResponse(responseCode = "404", description = "Post not found")
+    })
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("{id}")
     public ResponseEntity<PostDto> patchPost(
             @PathVariable(name = "id") long id,
@@ -113,7 +128,6 @@ public class PostController {
     ){
         return ResponseEntity.ok(postService.patchPost(id,patchPayload));
     }
-
 
     // delete post by id
     @Operation(
