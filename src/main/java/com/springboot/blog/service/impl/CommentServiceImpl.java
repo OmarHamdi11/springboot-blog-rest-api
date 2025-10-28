@@ -1,5 +1,7 @@
 package com.springboot.blog.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.springboot.blog.entity.Comment;
 import com.springboot.blog.entity.Post;
 import com.springboot.blog.exception.BlogAPIException;
@@ -19,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -26,12 +29,18 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final ModelMapper modelMapper;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository, PostRepository postRepository, ModelMapper modelMapper) {
+    public CommentServiceImpl(CommentRepository commentRepository,
+                              PostRepository postRepository,
+                              ModelMapper modelMapper,
+                              ObjectMapper objectMapper
+    ) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
         this.modelMapper = modelMapper;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -50,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentResponse getCommentsByPostId(long postId, int pageNo, int pageSize, String sortBy, String sortDir) {
 
-        Post post = postRepository.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post","id",postId));
+        postRepository.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post","id",postId));
 
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
@@ -103,11 +112,30 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    public CommentDto patchComment(long postId, long commentId, Map<String, Object> patchPayload) {
+
+        Comment comment = validateCommentWithPost(postId,commentId);
+
+        CommentDto commentDto = mapToDTO(comment);
+
+        CommentDto patchedCommentDto = apply(patchPayload,commentDto);
+
+        // Map back to entity and save
+        comment.setName(patchedCommentDto.getName());
+        comment.setEmail(patchedCommentDto.getEmail());
+        comment.setBody(patchedCommentDto.getBody());
+
+        Comment savedComment = commentRepository.save(comment);
+
+        return mapToDTO(savedComment);
+    }
+
+    @Override
     public void deleteCommentById(long postId, long commentId) {
 
         Comment comment = validateCommentWithPost(postId,commentId);
 
-        commentRepository.deleteById(commentId);
+        commentRepository.deleteById(comment.getId());
     }
 
     private Comment validateCommentWithPost(long postId, long commentId){
@@ -130,5 +158,19 @@ public class CommentServiceImpl implements CommentService {
         return modelMapper.map(commentDto, Comment.class);
     }
 
+    private CommentDto apply(Map<String, Object> patchPayload, CommentDto commentDto) {
+
+        // convert commentDto object to json object node using ObjectMapper
+        ObjectNode commentNode = objectMapper.convertValue(commentDto, ObjectNode.class);
+
+        // convert patchPayload to json object node using ObjectMapper
+        ObjectNode patchNode = objectMapper.convertValue(patchPayload , ObjectNode.class);
+
+        // merge patch update into post node
+        commentNode.setAll(patchNode);
+
+        return objectMapper.convertValue(commentNode , CommentDto.class);
+
+    }
 
 }

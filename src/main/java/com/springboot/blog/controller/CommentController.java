@@ -2,6 +2,7 @@ package com.springboot.blog.controller;
 
 import com.springboot.blog.payload.CommentDto;
 import com.springboot.blog.payload.CommentResponse;
+import com.springboot.blog.payload.PostDto;
 import com.springboot.blog.service.CommentService;
 import com.springboot.blog.utils.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +13,10 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 
 @RestController
@@ -94,6 +98,27 @@ public class CommentController {
     ){
         return new ResponseEntity<>(commentService.updateComment(postId, commentId, commentDto),HttpStatus.OK);
     }
+
+    @Operation(
+            summary = "Patch comment",
+            description = "Patch an existing comment with new data for a specific post"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Comment updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid comment data provided"),
+            @ApiResponse(responseCode = "404", description = "Comment or Post not found")
+    })
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("{commentId}")
+    public ResponseEntity<CommentDto> patchComment(
+            @PathVariable(value = "postId") long postId,
+            @PathVariable(value = "commentId") long commentId,
+            @RequestBody Map<String,Object> patchPayload
+    ){
+        return ResponseEntity.ok(commentService.patchComment(postId, commentId, patchPayload));
+    }
+
+
 
     @Operation(
             summary = "Delete comment",

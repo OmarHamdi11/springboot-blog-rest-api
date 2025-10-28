@@ -4,6 +4,7 @@ import com.springboot.blog.payload.CommentDto;
 import com.springboot.blog.payload.CommentResponse;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CommentService {
 
@@ -14,6 +15,8 @@ public interface CommentService {
     CommentDto getCommentById(long postId, long commentId);
 
     CommentDto updateComment(long postId, long commentId, CommentDto commentDto);
+
+    CommentDto patchComment(long postId, long commentId, Map<String,Object> patchPayload);
 
     void deleteCommentById(long postId, long commentId);
 
