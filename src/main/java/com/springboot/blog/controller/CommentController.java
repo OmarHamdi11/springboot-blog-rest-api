@@ -2,7 +2,6 @@ package com.springboot.blog.controller;
 
 import com.springboot.blog.payload.CommentDto;
 import com.springboot.blog.payload.CommentResponse;
-import com.springboot.blog.payload.PostDto;
 import com.springboot.blog.service.CommentService;
 import com.springboot.blog.utils.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,7 +19,7 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("/api/posts/{postId}/comments")
+@RequestMapping("/api/v1/posts/{postId}/comments")
 @Tag(name = "Comment Management", description = "APIs for managing comments on blog posts")
 public class CommentController {
 

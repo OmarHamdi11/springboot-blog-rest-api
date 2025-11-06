@@ -21,7 +21,7 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api/v1/posts")
 @Tag(name = "Post Management", description = "APIs for managing blog posts")
 public class PostController {
 
